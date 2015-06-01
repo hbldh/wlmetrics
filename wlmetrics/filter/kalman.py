@@ -103,10 +103,10 @@ class KalmanFilter(object):
 
         transition_covariance = np.eye(9) * 0.05
 
-        observation_matrix = np.zeros((9, 9), 'float')
+        observation_matrix = np.zeros((3, 9), 'float')
         observation_matrix[[0, 1, 2], [0, 1, 2]] = 1
 
-        observation_covariance = np.eye(9) * 0.025
+        observation_covariance = np.eye(3)*2
 
         return transition_matrix, transition_covariance, observation_matrix, observation_covariance
 
@@ -121,34 +121,33 @@ def main():
     A, transition_covariance, C, observation_covariance = KalmanFilter.get_accelerometer_filter_matrices(200)
 
     initial_state_mean = np.zeros((9, ), 'float')
-    initial_state_covariance = np.zeros((9, 9), 'float')
+    initial_state_covariance = np.ones((9, 9), 'float')
 
     kf = KalmanFilter(A, transition_covariance, C, observation_covariance)
     kf.set_initial_state(initial_state_mean, initial_state_covariance)
 
-    # try:
-    #     import pykalman
-    #
-    #     print("KF - pykalman")
-    #     obs = np.array([np.concatenate((o, np.zeros((6, ), 'float'))) for o in observations])
-    #     t = time.time()
-    #     kf2 = pykalman.KalmanFilter(A, C,
-    #                                 transition_covariance, observation_covariance,
-    #                                 initial_state_mean=initial_state_mean,
-    #                                 initial_state_covariance=initial_state_covariance)
-    #     #filtered_state_estimates = kf2.filter(obs)[0]
-    #     print("Time taken: {0} s".format(time.time() - t))
-    #
-    #     print('EM')
-    #     t = time.time()
-    #     kf3 = pykalman.KalmanFilter(em_vars=['transition_covariance', 'observation_covariance'])
-    #
-    #     print(kf3.em(obs, n_iter=5))
-    #     print(kf3.transition_covariance)
-    #     print(kf3.observation_covariance)
-    #     print("Time taken: {0} s".format(t - time.time()))
-    # except ImportError:
-    #     pass
+    try:
+        import pykalman
+
+        print("KF - pykalman")
+        t = time.time()
+        kf2 = pykalman.KalmanFilter(A, C,
+                                    transition_covariance, observation_covariance,
+                                    initial_state_mean=initial_state_mean,
+                                    initial_state_covariance=initial_state_covariance)
+        filtered_state_estimates = kf2.filter(observations)[0]
+        print("Time taken: {0} s".format(time.time() - t))
+
+        # print('EM')
+        # t = time.time()
+        # kf3 = pykalman.KalmanFilter(A, None, C, None, em_vars=['transition_covariance', 'observation_covariance'])
+        #
+        # print(kf3.em(obs, n_iter=5))
+        # print(kf3.transition_covariance)
+        # print(kf3.observation_covariance)
+        # print("Time taken: {0} s".format(t - time.time()))
+    except ImportError:
+        pass
 
     print("Kalman Filter")
     t = time.time()
@@ -156,13 +155,12 @@ def main():
     X = initial_state_mean
     P = initial_state_covariance
     for o in observations:
-        this_observation = np.concatenate((o, np.zeros((6, ), 'float')))
         X, P = kf.kf_predict(X, P)
-        X, P, K, IM, IS = kf.kf_update(X, P, this_observation)
+        X, P, K, IM, IS = kf.kf_update(X, P, o)
         States.append(X)
 
     States = np.array(States)
-    print("Time taken: {0} s".format(t - time.time()))
+    print("Time taken: {0} s".format(time.time() - t))
 
     try:
         # Draw estimates
@@ -170,11 +168,11 @@ def main():
         pl.figure()
         ax = pl.subplot2grid((2, 2), (0,0), colspan=2)
         lines_true = pl.plot(timestamps, np.array(observations))
-        #lines_filt1 = pl.plot(np.array(filtered_state_estimates[:, 0]), color='r')
-        lines_filt2 = pl.plot(timestamps, np.array(States[:, :3]), '--')
+        lines_filt = pl.plot(timestamps, np.array(States[:, :3]), '--')
 
         ax3 = pl.subplot2grid((2,2), (1,0), sharex=ax, colspan=2)
-        lines_filt1 = pl.plot(timestamps, np.array(States[:, 3:6]))
+        lines_true = pl.plot(timestamps, np.array(observations))
+        lines_filt = pl.plot(timestamps, np.array(filtered_state_estimates[:, :3]))
         # = pl.plot(np.array(filtered_state_estimates[:, 1]), 'r--')
 
         pl.show()
