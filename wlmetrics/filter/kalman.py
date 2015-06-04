@@ -111,6 +111,15 @@ class KalmanFilter(object):
         return transition_matrix, transition_covariance, observation_matrix, observation_covariance
 
 
+class StaticDetectingPositionKalmanFilter(KalmanFilter):
+
+    def __init__(self, transition_matrix, transition_covariance,
+                 observation_matrix, observation_covariance):
+        super(StaticDetectingPositionKalmanFilter, self).__init__(
+            transition_matrix, transition_covariance, observation_matrix, observation_covariance)
+        pass
+
+
 def main():
     import os
 
@@ -126,28 +135,28 @@ def main():
     kf = KalmanFilter(A, transition_covariance, C, observation_covariance)
     kf.set_initial_state(initial_state_mean, initial_state_covariance)
 
-    try:
-        import pykalman
-
-        print("KF - pykalman")
-        t = time.time()
-        kf2 = pykalman.KalmanFilter(A, C,
-                                    transition_covariance, observation_covariance,
-                                    initial_state_mean=initial_state_mean,
-                                    initial_state_covariance=initial_state_covariance)
-        filtered_state_estimates = kf2.filter(observations)[0]
-        print("Time taken: {0} s".format(time.time() - t))
-
-        # print('EM')
-        # t = time.time()
-        # kf3 = pykalman.KalmanFilter(A, None, C, None, em_vars=['transition_covariance', 'observation_covariance'])
-        #
-        # print(kf3.em(obs, n_iter=5))
-        # print(kf3.transition_covariance)
-        # print(kf3.observation_covariance)
-        # print("Time taken: {0} s".format(t - time.time()))
-    except ImportError:
-        pass
+    # try:
+    #     import pykalman
+    #
+    #     print("KF - pykalman")
+    #     t = time.time()
+    #     kf2 = pykalman.KalmanFilter(A, C,
+    #                                 transition_covariance, observation_covariance,
+    #                                 initial_state_mean=initial_state_mean,
+    #                                 initial_state_covariance=initial_state_covariance)
+    #     filtered_state_estimates = kf2.filter(observations)[0]
+    #     print("Time taken: {0} s".format(time.time() - t))
+    #
+    #     # print('EM')
+    #     # t = time.time()
+    #     # kf3 = pykalman.KalmanFilter(A, None, C, None, em_vars=['transition_covariance', 'observation_covariance'])
+    #     #
+    #     # print(kf3.em(obs, n_iter=5))
+    #     # print(kf3.transition_covariance)
+    #     # print(kf3.observation_covariance)
+    #     # print("Time taken: {0} s".format(t - time.time()))
+    # except ImportError:
+    #     pass
 
     print("Kalman Filter")
     t = time.time()
@@ -156,7 +165,7 @@ def main():
     P = initial_state_covariance
     for o in observations:
         X, P = kf.kf_predict(X, P)
-        X, P, K, IM, IS = kf.kf_update(X, P, o)
+        X, P, K, IM, IS = kf.kf_update(X, P, o - observations[0, :])
         States.append(X)
 
     States = np.array(States)
@@ -166,14 +175,31 @@ def main():
         # Draw estimates
         import matplotlib.pyplot as pl
         pl.figure()
-        ax = pl.subplot2grid((2, 2), (0,0), colspan=2)
-        lines_true = pl.plot(timestamps, np.array(observations))
-        lines_filt = pl.plot(timestamps, np.array(States[:, :3]), '--')
+        ax = pl.subplot2grid((4, 3), (0, 0))
+        pl.plot(timestamps, np.array(observations[:, 0]))
+        pl.plot(timestamps, np.array(States[:, 0]), 'r--')
+        ax = pl.subplot2grid((4, 3), (0, 1), sharex=ax)
+        pl.plot(timestamps, np.array(observations[:, 1]))
+        pl.plot(timestamps, np.array(States[:, 1]), 'r--')
+        ax = pl.subplot2grid((4, 3), (0, 2), sharex=ax)
+        pl.plot(timestamps, np.array(observations[:, 2]))
+        pl.plot(timestamps, np.array(States[:, 2]), 'r--')
 
-        ax3 = pl.subplot2grid((2,2), (1,0), sharex=ax, colspan=2)
-        lines_true = pl.plot(timestamps, np.array(observations))
-        lines_filt = pl.plot(timestamps, np.array(filtered_state_estimates[:, :3]))
-        # = pl.plot(np.array(filtered_state_estimates[:, 1]), 'r--')
+        ax = pl.subplot2grid((4, 3), (1, 0))
+        pl.plot(timestamps, np.array(States[:, 3]), 'r')
+        ax = pl.subplot2grid((4, 3), (1, 1), sharex=ax)
+        pl.plot(timestamps, np.array(States[:, 4]), 'r')
+        ax = pl.subplot2grid((4, 3), (1, 2), sharex=ax)
+        pl.plot(timestamps, np.array(States[:, 5]), 'r')
+
+        ax = pl.subplot2grid((4, 3), (2, 0))
+        pl.plot(timestamps, np.array(States[:, 6]), 'r')
+        ax = pl.subplot2grid((4, 3), (2, 1), sharex=ax)
+        pl.plot(timestamps, np.array(States[:, 7]), 'r')
+        ax = pl.subplot2grid((4, 3), (2, 2), sharex=ax)
+        pl.plot(timestamps, np.array(States[:, 8]), 'r')
+
+
 
         pl.show()
     except ImportError:
