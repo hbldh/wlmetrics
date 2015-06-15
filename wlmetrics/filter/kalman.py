@@ -49,6 +49,18 @@ class KalmanFilter(object):
         self.X = initial_state
         self.P = initial_covariance
 
+    def filter(self, observations):
+        states = []
+
+        X = self.X
+        P = self.P
+        for observation in observations:
+            X, P = self.kf_predict(X, P)
+            X, P, K, IM, IS = self.kf_update(X, P, observation)
+            states.append(X)
+
+        return np.array(states)
+
     def kf_predict(self, X, P):
         # Predict New State, X_k = A * X_{k-1}
         X = self.transition_matrix.dot(X)
@@ -113,11 +125,76 @@ class KalmanFilter(object):
 
 class StaticDetectingPositionKalmanFilter(KalmanFilter):
 
-    def __init__(self, transition_matrix, transition_covariance,
-                 observation_matrix, observation_covariance):
+    def __init__(self, data_freq, static_threshold=0.1, static_time=0.25):
+
+        self.f = data_freq
+        self.static_threshold = static_threshold
+        self.static_time = static_time
+
+        transition_matrix = np.eye(9)
+        transition_matrix[[3, 4, 5], [0, 1, 2]] = 1 / data_freq
+        transition_matrix[[6, 7, 8], [3, 4, 5]] = 1 / data_freq
+
+        transition_covariance = np.eye(9)
+
+        observation_matrix = np.zeros((3, 9), 'float')
+        observation_matrix[[0, 1, 2], [0, 1, 2]] = 1
+
+        observation_covariance = np.eye(3) * 20
+
         super(StaticDetectingPositionKalmanFilter, self).__init__(
             transition_matrix, transition_covariance, observation_matrix, observation_covariance)
-        pass
+
+        self._static_counter = self.f
+
+        self.set_initial_state(np.zeros((len(transition_matrix), ), 'float'),
+                               np.zeros((len(transition_matrix), len(transition_matrix)), 'float'))
+
+    def filter(self, observations):
+        states = []
+        static_array = []
+        static_position = None
+
+        current_gravity_vector = observations[0, :]
+        static_since = 0
+
+        X = self.X
+        P = self.P
+
+        for i, observation in enumerate(observations):
+            if np.abs(1 - np.linalg.norm(observation)) < self.static_threshold and self.is_static():
+                current_gravity_vector = np.mean(observations[static_since:i+1, :], 0)
+                static_array.append(1)
+                X[3:6] = 0
+                static_position = X[6:].copy()
+            else:
+                if np.abs(1 - np.linalg.norm(observation)) < self.static_threshold:
+                    self._static_counter += 1
+                    if self.is_static():
+                        current_gravity_vector = np.mean(observations[static_since:i + 1, :], 0)
+                        static_array.append(1)
+                        X[3:6] = 0
+                        static_position = X[6:].copy()
+                    else:
+                        static_array.append(0.5)
+                else:
+                    self._static_counter = 0
+                    static_array.append(0)
+
+            X, P = self.kf_predict(X, P)
+            if self.is_static():
+                X[3:6] = 0
+                X[6:] = static_position
+            X, P, K, IM, IS = self.kf_update(X, P, (observation - current_gravity_vector) * 9.81)
+            if self.is_static():
+                X[3:6] = 0
+                X[6:] = static_position
+            states.append(X)
+
+        return np.array(states), np.array(static_array)
+
+    def is_static(self):
+        return self._static_counter > (self.f * self.static_time)
 
 
 def main():
@@ -127,48 +204,24 @@ def main():
     timestamps = observations[:, 0]
     observations = observations[:, 1:]
 
-    A, transition_covariance, C, observation_covariance = KalmanFilter.get_accelerometer_filter_matrices(200)
-
-    initial_state_mean = np.zeros((9, ), 'float')
-    initial_state_covariance = np.ones((9, 9), 'float')
-
-    kf = KalmanFilter(A, transition_covariance, C, observation_covariance)
-    kf.set_initial_state(initial_state_mean, initial_state_covariance)
-
-    # try:
-    #     import pykalman
+    # A, transition_covariance, C, observation_covariance = KalmanFilter.get_accelerometer_filter_matrices(200)
     #
-    #     print("KF - pykalman")
-    #     t = time.time()
-    #     kf2 = pykalman.KalmanFilter(A, C,
-    #                                 transition_covariance, observation_covariance,
-    #                                 initial_state_mean=initial_state_mean,
-    #                                 initial_state_covariance=initial_state_covariance)
-    #     filtered_state_estimates = kf2.filter(observations)[0]
-    #     print("Time taken: {0} s".format(time.time() - t))
+    # initial_state_mean = np.zeros((9, ), 'float')
+    # initial_state_covariance = np.ones((9, 9), 'float')
     #
-    #     # print('EM')
-    #     # t = time.time()
-    #     # kf3 = pykalman.KalmanFilter(A, None, C, None, em_vars=['transition_covariance', 'observation_covariance'])
-    #     #
-    #     # print(kf3.em(obs, n_iter=5))
-    #     # print(kf3.transition_covariance)
-    #     # print(kf3.observation_covariance)
-    #     # print("Time taken: {0} s".format(t - time.time()))
-    # except ImportError:
-    #     pass
+    # kf = StaticDetectingPositionKalmanFilter(A, transition_covariance, C, observation_covariance)
+    # kf.set_initial_state(initial_state_mean, initial_state_covariance)
+    #
+    # print("Kalman Filter")
+    # t = time.time()
+    # States = kf.filter(observations)
+    # print("Time taken: {0} s".format(time.time() - t))
 
-    print("Kalman Filter")
+    kf = StaticDetectingPositionKalmanFilter(200, 0.05, 0.4)
+
+    print("Static Kalman Filter")
     t = time.time()
-    States = []
-    X = initial_state_mean
-    P = initial_state_covariance
-    for o in observations:
-        X, P = kf.kf_predict(X, P)
-        X, P, K, IM, IS = kf.kf_update(X, P, o - observations[0, :])
-        States.append(X)
-
-    States = np.array(States)
+    States, Static_State = kf.filter(observations)
     print("Time taken: {0} s".format(time.time() - t))
 
     try:
@@ -176,30 +229,33 @@ def main():
         import matplotlib.pyplot as pl
         pl.figure()
         ax = pl.subplot2grid((4, 3), (0, 0))
-        pl.plot(timestamps, np.array(observations[:, 0]))
-        pl.plot(timestamps, np.array(States[:, 0]), 'r--')
+        # pl.plot(timestamps, np.array(observations[:, 0]))
+        pl.plot(timestamps, np.array(States[:, 0]), 'b')
         ax = pl.subplot2grid((4, 3), (0, 1), sharex=ax)
-        pl.plot(timestamps, np.array(observations[:, 1]))
-        pl.plot(timestamps, np.array(States[:, 1]), 'r--')
+        # pl.plot(timestamps, np.array(observations[:, 1]))
+        pl.plot(timestamps, np.array(States[:, 1]), 'b')
         ax = pl.subplot2grid((4, 3), (0, 2), sharex=ax)
-        pl.plot(timestamps, np.array(observations[:, 2]))
-        pl.plot(timestamps, np.array(States[:, 2]), 'r--')
+        # pl.plot(timestamps, np.array(observations[:, 2]))
+        pl.plot(timestamps, np.array(States[:, 2]), 'b')
 
-        ax = pl.subplot2grid((4, 3), (1, 0))
+        ax = pl.subplot2grid((4, 3), (1, 0), sharex=ax)
         pl.plot(timestamps, np.array(States[:, 3]), 'r')
         ax = pl.subplot2grid((4, 3), (1, 1), sharex=ax)
         pl.plot(timestamps, np.array(States[:, 4]), 'r')
         ax = pl.subplot2grid((4, 3), (1, 2), sharex=ax)
         pl.plot(timestamps, np.array(States[:, 5]), 'r')
 
-        ax = pl.subplot2grid((4, 3), (2, 0))
+        ax = pl.subplot2grid((4, 3), (2, 0), sharex=ax)
         pl.plot(timestamps, np.array(States[:, 6]), 'r')
         ax = pl.subplot2grid((4, 3), (2, 1), sharex=ax)
         pl.plot(timestamps, np.array(States[:, 7]), 'r')
         ax = pl.subplot2grid((4, 3), (2, 2), sharex=ax)
         pl.plot(timestamps, np.array(States[:, 8]), 'r')
 
-
+        ax = pl.subplot2grid((4, 3), (3, 0), colspan=2, sharex=ax)
+        pl.plot(timestamps, np.array(Static_State), 'r')
+        ax = pl.subplot2grid((4, 3), (3, 2), sharex=ax)
+        pl.plot(timestamps, np.sqrt(np.sum(observations**2, 1)), 'b')
 
         pl.show()
     except ImportError:
