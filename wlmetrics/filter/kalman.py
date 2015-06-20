@@ -152,6 +152,7 @@ class StaticDetectingPositionKalmanFilter(KalmanFilter):
 
     def filter(self, observations):
         states = []
+        gravity = []
         static_array = []
         static_position = None
 
@@ -171,16 +172,19 @@ class StaticDetectingPositionKalmanFilter(KalmanFilter):
                 if np.abs(1 - np.linalg.norm(observation)) < self.static_threshold:
                     self._static_counter += 1
                     if self.is_static():
+                        static_since = i
                         current_gravity_vector = np.mean(observations[static_since:i + 1, :], 0)
                         static_array.append(1)
                         X[3:6] = 0
                         static_position = X[6:].copy()
+
                     else:
                         static_array.append(0.5)
                 else:
                     self._static_counter = 0
+                    static_since = None
                     static_array.append(0)
-
+            gravity.append(current_gravity_vector.copy())
             X, P = self.kf_predict(X, P)
             if self.is_static():
                 X[3:6] = 0
@@ -191,7 +195,7 @@ class StaticDetectingPositionKalmanFilter(KalmanFilter):
                 X[6:] = static_position
             states.append(X)
 
-        return np.array(states), np.array(static_array)
+        return np.array(states), np.array(static_array), np.array(gravity)
 
     def is_static(self):
         return self._static_counter > (self.f * self.static_time)
@@ -217,11 +221,11 @@ def main():
     # States = kf.filter(observations)
     # print("Time taken: {0} s".format(time.time() - t))
 
-    kf = StaticDetectingPositionKalmanFilter(200, 0.05, 0.4)
+    kf = StaticDetectingPositionKalmanFilter(200, 0.025, 0.2)
 
     print("Static Kalman Filter")
     t = time.time()
-    States, Static_State = kf.filter(observations)
+    States, Static_State, G = kf.filter(observations)
     print("Time taken: {0} s".format(time.time() - t))
 
     try:
@@ -229,13 +233,13 @@ def main():
         import matplotlib.pyplot as pl
         pl.figure()
         ax = pl.subplot2grid((4, 3), (0, 0))
-        # pl.plot(timestamps, np.array(observations[:, 0]))
+        pl.plot(timestamps, np.array(G[:, 0]), 'r')
         pl.plot(timestamps, np.array(States[:, 0]), 'b')
         ax = pl.subplot2grid((4, 3), (0, 1), sharex=ax)
-        # pl.plot(timestamps, np.array(observations[:, 1]))
+        pl.plot(timestamps, np.array(G[:, 1]), 'r')
         pl.plot(timestamps, np.array(States[:, 1]), 'b')
         ax = pl.subplot2grid((4, 3), (0, 2), sharex=ax)
-        # pl.plot(timestamps, np.array(observations[:, 2]))
+        pl.plot(timestamps, np.array(G[:, 2]), 'r')
         pl.plot(timestamps, np.array(States[:, 2]), 'b')
 
         ax = pl.subplot2grid((4, 3), (1, 0), sharex=ax)
