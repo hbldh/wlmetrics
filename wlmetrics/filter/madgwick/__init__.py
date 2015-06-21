@@ -23,9 +23,8 @@ from __future__ import absolute_import
 __all__ = ['MadgwickAHRSFilter']
 
 try:
-    # noinspection PyStatementEffect
-    import .madgwick as madgwick_methods
-except ImportError:
+    from . import madgwick as madgwick_methods
+except Exception as e:
     raise
 
 

@@ -24,6 +24,10 @@ madgwick = Extension('wlmetrics.fusion.madgwick.madgwick',
                      include_dirs=['wlmetrics/fusion/madgwick/src'],
                      sources=['wlmetrics/fusion/madgwick/src/madgwick.c',
                               'wlmetrics/fusion/madgwick/src/MadgwickAHRS.c'])
+mahoney = Extension('wlmetrics.fusion.madgwick.mahoney',
+                     include_dirs=['wlmetrics/fusion/mahoney/src'],
+                     sources=['wlmetrics/fusion/mahoney/src/mahoney.c',
+                              'wlmetrics/fusion/mahoney/src/MahoneyAHRS.c'])
 
 setup(
     name='wlmetrics',
