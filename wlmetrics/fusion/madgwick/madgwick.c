@@ -1,0 +1,50 @@
+/**
+ **************************************************************************************
+ * @file    madgwick.c
+ * @author  hbldh
+ * @version 0.1
+ * @date    2015-06-21
+ * @brief   C extension.
+ **************************************************************************************
+ */
+
+#include <Python.h>
+#include "src/MadgwickAHRS.h"
+
+static char Magdwick_AHRS_update_docs[] =
+      "Docstring\n\n"
+      "Definition:\n"
+      "  method_name(data)\n\n"
+      "Parameters::\n\n"
+      "  data\n"
+      "    Param docstring\n\n"
+      "Return::\n\n"
+      "  rvalue\n"
+      "    The value result.\n\n";
+
+static PyObject *Magdwick_AHRS_update_func(PyObject *self, PyObject *args)
+{
+    PyObject *data=NULL;
+    float gx, gy, gz;
+    float ax, ay, az;
+    float mx, my, mz;
+
+    /* Parse the input.*/
+    if (!PyArg_ParseTuple(args, "fffffffff", &gx, &gy, &gz, &ax, &ay, &az, &mx, &my, &mz))
+        return NULL;
+
+    MadgwickAHRSUpdate(gx, gy, gz, ax, ay, az, mx, my, mz);
+    return Py_BuildValue("(ffff)", q0, q1, q2, q3);
+}
+
+static PyMethodDef madgwickMethods[] = {
+    {"magdwick_AHRS_update", Magdwick_AHRS_update_func, METH_VARARGS, Magdwick_AHRS_update_docs},
+     {NULL, NULL, 0, NULL} /* Sentinel */
+};
+
+PyMODINIT_FUNC initmadgwick(void)
+{
+    char * docstring = "Python C extension of Madgwick's Sensor Fusion algorithm.";
+    (void) Py_InitModule3("madgwick", madgwickMethods, docstring);
+    import_array();
+}
