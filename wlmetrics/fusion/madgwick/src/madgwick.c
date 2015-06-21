@@ -9,12 +9,12 @@
  */
 
 #include <Python.h>
-#include "src/MadgwickAHRS.h"
+#include "MadgwickAHRS.h"
 
 static char Magdwick_AHRS_update_docs[] =
-      "Docstring\n\n"
+      "AHRS algorithm updateg\n\n"
       "Definition:\n"
-      "  method_name(data)\n\n"
+      "  magdwick_AHRS_update(gx, gy, gz, ax, ay, az, mx, my, mz)\n\n"
       "Parameters::\n\n"
       "  data\n"
       "    Param docstring\n\n"
@@ -56,7 +56,7 @@ static PyObject *Magdwick_AHRS_update_IMU_func(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "ffffff", &gx, &gy, &gz, &ax, &ay, &az))
         return NULL;
 
-    MadgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az, mx, my, mz);
+    MadgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az);
     return Py_BuildValue("(ffff)", q0, q1, q2, q3);
 }
 
