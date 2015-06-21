@@ -20,10 +20,10 @@ from __future__ import absolute_import
 import wlmetrics
 from setuptools import setup, find_packages, Extension
 
-# madgwick = Extension('madgwick',
-#                      include_dirs=['wlmetrics/fusion/madgwick/src'],
-#                      sources=['wlmetrics/fusion/madgwick/src/madgwick.c',
-#                               'wlmetrics/fusion/madgwick/src/MadgwickAHRS.c'])
+madgwick = Extension('wlmetrics.fusion.madgwick.madgwick',
+                     include_dirs=['wlmetrics/fusion/madgwick/src'],
+                     sources=['wlmetrics/fusion/madgwick/src/madgwick.c',
+                              'wlmetrics/fusion/madgwick/src/MadgwickAHRS.c'])
 
 setup(
     name='wlmetrics',
@@ -51,7 +51,7 @@ setup(
     ],
     dependency_links=[],
     ext_modules=[
-        #madgwick
+        madgwick
         ],
     entry_points={
         'console_scripts': [
