@@ -19,11 +19,7 @@ from __future__ import print_function
 #from __future__ import unicode_literals
 from __future__ import absolute_import
 
-from distutils.core import setup, Extension
 
-madgwick = Extension('madgwick',
-                    include_dirs=['src'],
-                    sources=['madgwick.c', 'src/MahonyAHRS.c'])
 
 setup(name='Madgwick Extension',
       version='0.0.1',
