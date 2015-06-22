@@ -44,13 +44,13 @@ static PyObject *Magdwick_AHRS_update_func(PyObject *self, PyObject *args)
     float ax, ay, az;
     float mx, my, mz;
     float freq;
+    float q[4];
 
     /* Parse the input.*/
-    if (!PyArg_ParseTuple(args, "ffffffffff", &gx, &gy, &gz, &ax, &ay, &az, &mx, &my, &mz, &freq))
+    if (!PyArg_ParseTuple(args, "ffffffffffffff", &gx, &gy, &gz, &ax, &ay, &az, &mx, &my, &mz, &freq, &q[0], &q[1], &q[2], &q[3]))
         return NULL;
 
-    float q[] = {1.0, 0.0, 0.0, 0.0};
-    MadgwickAHRSupdate(gx, gy, gz, ax, ay, az, mx, my, mz, freq, &q);
+    MadgwickAHRSupdate(gx, gy, gz, ax, ay, az, mx, my, mz, freq, q);
     return Py_BuildValue("(ffff)", q[0], q[1], q[2], q[3]);
 }
 
@@ -80,13 +80,13 @@ static PyObject *Magdwick_AHRS_update_IMU_func(PyObject *self, PyObject *args)
     float gx, gy, gz;
     float ax, ay, az;
     float freq;
+    float q[4];
 
     /* Parse the input.*/
-    if (!PyArg_ParseTuple(args, "ffffff", &gx, &gy, &gz, &ax, &ay, &az, &freq))
+    if (!PyArg_ParseTuple(args, "fffffffffff", &gx, &gy, &gz, &ax, &ay, &az, &freq, &q[0], &q[1], &q[2], &q[3]))
         return NULL;
 
-    float q[] = {1.0, 0.0, 0.0, 0.0};
-    MadgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az, freq, &q);
+    MadgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az, freq, q);
     return Py_BuildValue("(ffff)", q[0], q[1], q[2], q[3]);
 }
 

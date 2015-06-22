@@ -25,9 +25,9 @@ madgwick = Extension('wlmetrics.filter.madgwick.madgwick',
                      sources=['wlmetrics/filter/madgwick/src/madgwick.c',
                               'wlmetrics/filter/madgwick/src/MadgwickAHRS.c'])
 mahony = Extension('wlmetrics.filter.mahony.mahony',
-                     include_dirs=['wlmetrics/filter/mahony/src'],
-                     sources=['wlmetrics/filter/mahony/src/mahony.c',
-                              'wlmetrics/filter/mahony/src/MahonyAHRS.c'])
+                    include_dirs=['wlmetrics/filter/mahony/src'],
+                    sources=['wlmetrics/filter/mahony/src/mahony.c',
+                             'wlmetrics/filter/mahony/src/MahonyAHRS.c'])
 
 setup(
     name='wlmetrics',
@@ -56,7 +56,7 @@ setup(
     dependency_links=[],
     ext_modules=[
         madgwick,
-        mahony
+        mahony,
         ],
     entry_points={
         'console_scripts': [

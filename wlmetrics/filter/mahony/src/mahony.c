@@ -43,13 +43,15 @@ static PyObject *Mahony_AHRS_update_func(PyObject *self, PyObject *args)
     float gx, gy, gz;
     float ax, ay, az;
     float mx, my, mz;
+    float freq;
+    float q[4];
 
     /* Parse the input.*/
-    if (!PyArg_ParseTuple(args, "fffffffff", &gx, &gy, &gz, &ax, &ay, &az, &mx, &my, &mz))
+    if (!PyArg_ParseTuple(args, "ffffffffffffff", &gx, &gy, &gz, &ax, &ay, &az, &mx, &my, &mz, &freq, &q[0], &q[1], &q[2], &q[3]))
         return NULL;
 
-    MahonyAHRSupdate(gx, gy, gz, ax, ay, az, mx, my, mz);
-    return Py_BuildValue("(ffff)", q0, q1, q2, q3);
+    MahonyAHRSupdate(gx, gy, gz, ax, ay, az, mx, my, mz, freq, q);
+    return Py_BuildValue("(ffff)", q[0], q[1], q[2], q[3]);
 }
 
 static char Mahony_AHRS_update_IMU_docs[] =
@@ -77,13 +79,15 @@ static PyObject *Mahony_AHRS_update_IMU_func(PyObject *self, PyObject *args)
 {
     float gx, gy, gz;
     float ax, ay, az;
+    float freq;
+    float q[4];
 
     /* Parse the input.*/
-    if (!PyArg_ParseTuple(args, "ffffff", &gx, &gy, &gz, &ax, &ay, &az))
+    if (!PyArg_ParseTuple(args, "fffffffffff", &gx, &gy, &gz, &ax, &ay, &az, &freq, &q[0], &q[1], &q[2], &q[3]))
         return NULL;
 
-    MahonyAHRSupdateIMU(gx, gy, gz, ax, ay, az);
-    return Py_BuildValue("(ffff)", q0, q1, q2, q3);
+    MahonyAHRSupdateIMU(gx, gy, gz, ax, ay, az, freq, q);
+    return Py_BuildValue("(ffff)", q[0], q[1], q[2], q[3]);
 }
 
 static PyMethodDef mahonyMethods[] = {

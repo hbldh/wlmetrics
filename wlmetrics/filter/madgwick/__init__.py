@@ -23,7 +23,7 @@ from __future__ import absolute_import
 __all__ = ['MadgwickAHRSFilter']
 
 try:
-    from . import madgwick as madgwick_methods
+    from . import madgwick
 except Exception as e:
     raise
 

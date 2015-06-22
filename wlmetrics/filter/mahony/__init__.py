@@ -23,16 +23,16 @@ from __future__ import absolute_import
 __all__ = ['MahoneyAHRSFilter']
 
 try:
-    from . import mahoney as mahoney_methods
+    from . import mahony as mahony
 except Exception as e:
     raise
 
 
-class MahoneyAHRSFilter(object):
-    """Python wrapper class of Mahoney filter methods written by Madgwick."""
+class MahonyAHRSFilter(object):
+    """Python wrapper class of Mahony filter methods."""
 
     def __init__(self, frequency):
-        """Constructor for MahoneyAHRSFilter"""
+        """Constructor for MahonyAHRSFilter"""
         self.frequency = frequency
         self.quaternion = (1, 0, 0, 0)
 
