@@ -20,14 +20,14 @@ from __future__ import absolute_import
 import wlmetrics
 from setuptools import setup, find_packages, Extension
 
-madgwick = Extension('wlmetrics.fusion.madgwick.madgwick',
-                     include_dirs=['wlmetrics/fusion/madgwick/src'],
-                     sources=['wlmetrics/fusion/madgwick/src/madgwick.c',
-                              'wlmetrics/fusion/madgwick/src/MadgwickAHRS.c'])
-mahoney = Extension('wlmetrics.fusion.madgwick.mahoney',
-                     include_dirs=['wlmetrics/fusion/mahoney/src'],
-                     sources=['wlmetrics/fusion/mahoney/src/mahoney.c',
-                              'wlmetrics/fusion/mahoney/src/MahoneyAHRS.c'])
+madgwick = Extension('wlmetrics.filter.madgwick.madgwick',
+                     include_dirs=['wlmetrics/filter/madgwick/src'],
+                     sources=['wlmetrics/filter/madgwick/src/madgwick.c',
+                              'wlmetrics/filter/madgwick/src/MadgwickAHRS.c'])
+mahony = Extension('wlmetrics.filter.mahony.mahony',
+                     include_dirs=['wlmetrics/filter/mahony/src'],
+                     sources=['wlmetrics/filter/mahony/src/mahony.c',
+                              'wlmetrics/filter/mahony/src/MahonyAHRS.c'])
 
 setup(
     name='wlmetrics',
@@ -55,7 +55,8 @@ setup(
     ],
     dependency_links=[],
     ext_modules=[
-        madgwick
+        madgwick,
+        mahony
         ],
     entry_points={
         'console_scripts': [

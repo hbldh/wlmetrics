@@ -1,20 +1,20 @@
 /**
  **************************************************************************************
- * @file    mahoney.c
+ * @file    mahony.c
  * @author  hbldh
  * @version 0.1
  * @date    2015-06-21
- * @brief   C extension wrapping Mahoney filter methods for Python.
+ * @brief   C extension wrapping Mahony filter methods for Python.
  **************************************************************************************
  */
 
 #include <Python.h>
-#include "MahoneyAHRS.h"
+#include "MahonyAHRS.h"
 
-static char Mahoney_AHRS_update_docs[] =
+static char Mahony_AHRS_update_docs[] =
       "AHRS algorithm update\n\n"
       "Definition:\n"
-      "  mahoney_AHRS_update(gx, gy, gz, ax, ay, az, mx, my, mz)\n\n"
+      "  Mahony_AHRS_update(gx, gy, gz, ax, ay, az, mx, my, mz)\n\n"
       "Parameters::\n\n"
       "  gx\n"
       "    Gyroscope X axis value.\n\n"
@@ -38,7 +38,7 @@ static char Mahoney_AHRS_update_docs[] =
       "  tuple\n"
       "    The updated quaternion.\n\n";
 
-static PyObject *Mahoney_AHRS_update_func(PyObject *self, PyObject *args)
+static PyObject *Mahony_AHRS_update_func(PyObject *self, PyObject *args)
 {
     float gx, gy, gz;
     float ax, ay, az;
@@ -48,14 +48,14 @@ static PyObject *Mahoney_AHRS_update_func(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "fffffffff", &gx, &gy, &gz, &ax, &ay, &az, &mx, &my, &mz))
         return NULL;
 
-    MahoneyAHRSupdate(gx, gy, gz, ax, ay, az, mx, my, mz);
+    MahonyAHRSupdate(gx, gy, gz, ax, ay, az, mx, my, mz);
     return Py_BuildValue("(ffff)", q0, q1, q2, q3);
 }
 
-static char Mahoney_AHRS_update_IMU_docs[] =
+static char Mahony_AHRS_update_IMU_docs[] =
       "IMU algorithm update\n\n"
       "Definition:\n"
-      "  mahoney_AHRS_update_IMU(gx, gy, gz, ax, ay, az)\n\n"
+      "  Mahony_AHRS_update_IMU(gx, gy, gz, ax, ay, az)\n\n"
       "Parameters::\n\n"
       "  gx\n"
       "    Gyroscope X axis value.\n\n"
@@ -73,7 +73,7 @@ static char Mahoney_AHRS_update_IMU_docs[] =
       "  tuple\n"
       "    The updated quaternion.\n\n";
 
-static PyObject *Mahoney_AHRS_update_IMU_func(PyObject *self, PyObject *args)
+static PyObject *Mahony_AHRS_update_IMU_func(PyObject *self, PyObject *args)
 {
     float gx, gy, gz;
     float ax, ay, az;
@@ -82,18 +82,18 @@ static PyObject *Mahoney_AHRS_update_IMU_func(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "ffffff", &gx, &gy, &gz, &ax, &ay, &az))
         return NULL;
 
-    MahoneyAHRSupdateIMU(gx, gy, gz, ax, ay, az);
+    MahonyAHRSupdateIMU(gx, gy, gz, ax, ay, az);
     return Py_BuildValue("(ffff)", q0, q1, q2, q3);
 }
 
-static PyMethodDef mahoneyMethods[] = {
-    {"mahoney_AHRS_update", Mahoney_AHRS_update_func, METH_VARARGS, Mahoney_AHRS_update_docs},
-    {"mahoney_AHRS_update_IMU", Mahoney_AHRS_update_IMU_func, METH_VARARGS, Mahoney_AHRS_update_IMU_docs},
+static PyMethodDef mahonyMethods[] = {
+    {"Mahony_AHRS_update", Mahony_AHRS_update_func, METH_VARARGS, Mahony_AHRS_update_docs},
+    {"Mahony_AHRS_update_IMU", Mahony_AHRS_update_IMU_func, METH_VARARGS, Mahony_AHRS_update_IMU_docs},
      {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
-PyMODINIT_FUNC initmahoney(void)
+PyMODINIT_FUNC initmahony(void)
 {
-    char * docstring = "Python C extension of Mahoney's Complementary Filter";
-    (void) Py_InitModule3("mahoney", mahoneyMethods, docstring);
+    char * docstring = "Python C extension of Mahony's AHRS Filter";
+    (void) Py_InitModule3("mahony", mahonyMethods, docstring);
 }

@@ -86,7 +86,7 @@ static PyObject *Magdwick_AHRS_update_IMU_func(PyObject *self, PyObject *args)
         return NULL;
 
     float q[] = {1.0, 0.0, 0.0, 0.0};
-    MadgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az, freq);
+    MadgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az, freq, &q);
     return Py_BuildValue("(ffff)", q[0], q[1], q[2], q[3]);
 }
 
