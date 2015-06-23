@@ -60,7 +60,15 @@ class Quaternion(object):
         if isinstance(other, Quaternion):
             return Quaternion(self.to_array() + other.to_array())
         elif isinstance(other, (int, float)):
-            return Quaternion(self._elements + other)
+            return self + Quaternion([other, 0, 0, 0])
+        else:
+            raise NotImplementedError("Cannot add Quaternion with type {0}".format(type(other)))
+
+    def __iadd__(self, other):
+        if isinstance(other, Quaternion):
+            self._elements += other.to_array()
+        elif isinstance(other, (int, float)):
+            self._elements += Quaternion([other, 0, 0, 0]).to_array()
         else:
             raise NotImplementedError("Cannot add Quaternion with type {0}".format(type(other)))
 
@@ -71,6 +79,14 @@ class Quaternion(object):
             return Quaternion(self._elements - other)
         else:
             raise NotImplementedError("Cannot subtract Quaternion with type {0}".format(type(other)))
+
+    def __isub__(self, other):
+        if isinstance(other, Quaternion):
+            self._elements -= other.to_array()
+        elif isinstance(other, (int, float)):
+            self._elements -= Quaternion([other, 0, 0, 0]).to_array()
+        else:
+            raise NotImplementedError("Cannot add Quaternion with type {0}".format(type(other)))
 
     def __mul__(self, other):
         if isinstance(other, Quaternion):
@@ -83,16 +99,46 @@ class Quaternion(object):
         else:
             raise NotImplementedError("Cannot multiply Quaternion with type {0}".format(type(other)))
 
-    def __div__(self, other):
+    def __imul__(self, other):
         if isinstance(other, Quaternion):
-            raise NotImplementedError('TBD...')
+            self._elements[:] = [self.w * other.w - (self.x * other.x) - (self.y * other.y) - (self.z * other.z),
+                                 self.w * other.x + self.x * other.w + self.y * other.z - (self.z * other.y),
+                                 self.w * other.y - (self.x * other.z) + self.y * other.w + self.z * other.x,
+                                 self.w * other.z + self.x * other.y - (self.y * other.x) + self.z * other.w]
+        elif isinstance(other, (int, float)):
+            self._elements *= other
+        else:
+            raise NotImplementedError("Cannot multiply Quaternion with type {0}".format(type(other)))
+
+    def __rmul__(self, other):
+        # Catch only int and float rmultiplications.
+        if isinstance(other, (int, float)):
+            return Quaternion(self._elements * other)
+
+    def __truediv__(self, other):
+        if isinstance(other, Quaternion):
+            return self * other.inverse()
         elif isinstance(other, (int, float)):
             return Quaternion(self._elements / other)
         else:
             raise NotImplementedError("Cannot multiply Quaternion with type {0}".format(type(other)))
 
-    def __abs__(self):
-        return self.norm()
+    def __itruediv__(self, other):
+        if isinstance(other, Quaternion):
+            self._elements[:] = (self * other.inverse()).to_array()
+        elif isinstance(other, (int, float)):
+            self._elements /= other
+        else:
+            raise NotImplementedError("Cannot multiply Quaternion with type {0}".format(type(other)))
+
+    def __floordiv__(self, other):
+        raise NotImplementedError("Floor Division not implemented for Quaternions.")
+
+    def __div__(self, other):
+        return self.__truediv__(other)
+
+    def __neg__(self):
+        return self * -1
 
     @property
     def w(self):
@@ -123,6 +169,9 @@ class Quaternion(object):
 
     def conjugate(self):
         return Quaternion([self.w, -self.x, -self.y, -self.z])
+
+    def inverse(self):
+        return self.conjugate() / (self.norm() ** 2)
 
     def norm(self):
         return np.linalg.norm(self._elements)

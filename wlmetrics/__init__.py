@@ -33,7 +33,7 @@ classifiers = [
 _version_major = 0
 _version_minor = 1
 _version_patch = 3
-_version_extra = 'dev0'
+_version_extra = 'devq'
 #_version_extra = 'a0'
 #_version_extra = ''  # Uncomment this for full releases
 
@@ -42,7 +42,7 @@ _ver = [_version_major, _version_minor, _version_patch]
 
 __version__ = '.'.join(map(str, _ver))
 if _version_extra:
-    __version__ = '.'.join(__version__, _version_extra)
+    __version__ = '.'.join([__version__, _version_extra])
 
 version = __version__  # backwards compatibility name
 version_info = (_version_major, _version_minor, _version_patch, _version_extra)
