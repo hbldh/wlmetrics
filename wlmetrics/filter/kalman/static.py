@@ -107,7 +107,7 @@ class StaticDetectingPositionKalmanFilter(KalmanFilter):
 def main():
     import os
 
-    observations = np.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_data.npy'))
+    observations = np.load(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'test_data.npy'))
     timestamps = observations[:, 0]
     observations = observations[:, 1:]
 
@@ -136,34 +136,33 @@ def main():
         import matplotlib.pyplot as pl
 
         pl.figure()
-        ax = pl.subplot2grid((4, 3), (0, 0))
-        pl.plot(timestamps, np.array(G[:, 0]), 'r')
-        pl.plot(timestamps, np.array(States[:, 0]), 'b')
-        ax = pl.subplot2grid((4, 3), (0, 1), sharex=ax)
-        pl.plot(timestamps, np.array(G[:, 1]), 'r')
+        ax = pl.subplot2grid((4, 3), (0, 0), colspan=3)
+        pl.plot(timestamps, np.array(States[:, 0]), 'r')
         pl.plot(timestamps, np.array(States[:, 1]), 'b')
-        ax = pl.subplot2grid((4, 3), (0, 2), sharex=ax)
-        pl.plot(timestamps, np.array(G[:, 2]), 'r')
-        pl.plot(timestamps, np.array(States[:, 2]), 'b')
+        pl.plot(timestamps, np.array(States[:, 2]), 'y')
 
         ax = pl.subplot2grid((4, 3), (1, 0), sharex=ax)
         pl.plot(timestamps, np.array(States[:, 3]), 'r')
         ax = pl.subplot2grid((4, 3), (1, 1), sharex=ax)
-        pl.plot(timestamps, np.array(States[:, 4]), 'r')
+        pl.plot(timestamps, np.array(States[:, 4]), 'b')
         ax = pl.subplot2grid((4, 3), (1, 2), sharex=ax)
-        pl.plot(timestamps, np.array(States[:, 5]), 'r')
+        pl.plot(timestamps, np.array(States[:, 5]), 'y')
 
         ax = pl.subplot2grid((4, 3), (2, 0), sharex=ax)
         pl.plot(timestamps, np.array(States[:, 6]), 'r')
         ax = pl.subplot2grid((4, 3), (2, 1), sharex=ax)
-        pl.plot(timestamps, np.array(States[:, 7]), 'r')
+        pl.plot(timestamps, np.array(States[:, 7]), 'b')
         ax = pl.subplot2grid((4, 3), (2, 2), sharex=ax)
-        pl.plot(timestamps, np.array(States[:, 8]), 'r')
+        pl.plot(timestamps, np.array(States[:, 8]), 'y')
 
-        ax = pl.subplot2grid((4, 3), (3, 0), colspan=2, sharex=ax)
-        pl.plot(timestamps, np.array(Static_State), 'r')
-        ax = pl.subplot2grid((4, 3), (3, 2), sharex=ax)
-        pl.plot(timestamps, np.sqrt(np.sum(observations ** 2, 1)), 'b')
+        ax = pl.subplot2grid((4, 3), (3, 0), colspan=23, sharex=ax)
+        MASS = 1
+        pl.plot(timestamps, np.sum(np.abs(MASS * States[:, :3] * States[:, 3:6]), axis=1))
+
+        # ax = pl.subplot2grid((4, 3), (3, 0), colspan=2, sharex=ax)
+        # pl.plot(timestamps, np.array(Static_State), 'r')
+        # ax = pl.subplot2grid((4, 3), (3, 2), sharex=ax)
+        # pl.plot(timestamps, np.sqrt(np.sum(observations ** 2, 1)), 'b')
 
         pl.show()
     except ImportError:
