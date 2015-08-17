@@ -105,11 +105,18 @@ class StaticDetectingPositionKalmanFilter(KalmanFilter):
 
 
 def main():
+    # Nbr 1: Ryck
+    # Nbr 2.1: Knäböj, hel acceleration
+    # Nbr 2.2: Knäböj, Acceleration från mitten
+    # Nbr 3: Stöt
+
     import os
 
     observations = np.load(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'test_data.npy'))
+
     timestamps = observations[:, 0]
     observations = observations[:, 1:]
+    observations[:, 2] *= -1.0
 
     # A, transition_covariance, C, observation_covariance = KalmanFilter.get_accelerometer_filter_matrices(200)
     #
