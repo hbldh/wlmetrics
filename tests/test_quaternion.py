@@ -111,5 +111,6 @@ class TestSuiteQuaternion(object):
 
     def test_conjugate(self):
         q = Quaternion(np.random.rand(4))
+        q.nornalize()
         np.testing.assert_allclose((q.conjugate() - Quaternion([q.w, -q.x, -q.y, -q.z])).to_array(), 0.0)
 
