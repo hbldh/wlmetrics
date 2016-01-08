@@ -41,13 +41,13 @@ class MadgwickAHRSFilter(object):
 
     def update_filter(self, a, g, m=None):
         if m is None:
-            self.quaternion = madgwick.magdwick_AHRS_update_IMU(
+            self.quaternion = Quaternion(madgwick.magdwick_AHRS_update_IMU(
                 a[0], a[1], a[2], g[0], g[1], g[2],
-                self.frequency, *self.quaternion.to_array())
+                self.frequency, *self.quaternion.to_array()))
         else:
-            self.quaternion = madgwick.magdwick_AHRS_update(
+            self.quaternion = Quaternion(madgwick.magdwick_AHRS_update(
                 a[0], a[1], a[2], g[0], g[1], g[2], m[0], m[1], m[2],
-                self.frequency, *self.quaternion.to_array())
+                self.frequency, *self.quaternion.to_array()))
 
     def filter(self, observations):
         states = []

@@ -12,13 +12,13 @@ branches:
 addons:
   apt:
     packages:
+    - python-dev
     - libblas-dev
     - liblapack-dev
     - libatlas-dev
     - gfortran
     - build-essential
 install:
-  - "pip install coverage"
   - "travis_wait pip install -r requirements.txt"
-script: nosetests tests --with-coverage --cover-package=wlmetrics
+script: nosetests tests
 

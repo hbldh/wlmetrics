@@ -78,8 +78,8 @@ class TestSuiteQuaternion(object):
         quat_1 = Quaternion(np.random.rand(4))
         quat_2 = Quaternion(np.random.rand(4))
 
-        np.testing.assert_allclose((self._reference_multiply(quat_1, quat_2) - (quat_1 * quat_2)).to_array(), 0.0, atol=1e-16)
-        np.testing.assert_allclose(self._reference_multiply(quat_1, quat_2).to_array() - (quat_1 * quat_2).to_array(), 0.0, atol=1e-16)
+        np.testing.assert_allclose((self._reference_multiply(quat_1, quat_2) - (quat_1 * quat_2)).to_array(), 0.0, atol=1e-15)
+        np.testing.assert_allclose(self._reference_multiply(quat_1, quat_2).to_array() - (quat_1 * quat_2).to_array(), 0.0, atol=1e-15)
 
     def test_norm_1(self):
         def test_fcn(q):

@@ -20,6 +20,8 @@ import numpy as np
 from scipy.integrate import cumtrapz
 import matplotlib.pyplot as plt
 
+from wlmetrics.filter.madgwick import MadgwickAHRSFilter
+
 from wlmetrics.container import WLMetricsContainer
 
 
@@ -41,6 +43,11 @@ def plot_rec_3():
 
 def _plot(file_path):
     data = WLMetricsContainer.load(file_path)
+
+    freq = 1/np.mean(np.diff(data.timestamps))
+    mfilter = MadgwickAHRSFilter(freq)
+    observations = np.concatenate((data.accelerometer, data.gyroscope, data.magnetometer), axis=1)
+    orientation = mfilter.filter(observations)
 
     plt.subplot(231)
     plt.plot(data.timestamps - data.timestamps[0], data.accelerometer)
