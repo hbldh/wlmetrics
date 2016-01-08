@@ -46,11 +46,13 @@ setup(
     classifiers=wlmetrics.classifiers,
     packages=find_packages(),
     package_data={
-        'docs': [
-            '*',
-        ],
+        'docs': ['*', ],
+        'wlmetrics.data': ['*.json', ]
     },
-    install_requires=[line.strip() for line in open("requirements.txt")],
+    install_requires=[
+        "numpy>=1.10.4",
+        "scipy>=0.16.1"
+    ],
     dependency_links=[],
     ext_modules=[
         madgwick,

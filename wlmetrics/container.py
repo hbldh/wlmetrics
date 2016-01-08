@@ -21,14 +21,15 @@ from __future__ import absolute_import
 
 import os
 import json
+import time
 import datetime
 
 import numpy as np
 
-from pyberryimu import version
+from wlmetrics import version
 
 
-class BerryIMUDataContainer(object):
+class WLMetricsContainer(object):
 
     def __init__(self, start_time, client_settings, calibration_parameters=None):
 
@@ -129,7 +130,6 @@ class BerryIMUDataContainer(object):
         out = cls(datetime.datetime.strptime(doc.get('recorded'), '%Y-%m-%d %H:%M:%S'),
             doc.get('client_settings'), doc.get('calibration_parameters'))
         out.recording_name = doc.get('name')
-        out.version = doc.get('version', version)
         if out.version.get('wlmetrics') is None:
             out.version['wlmetrics'] = version
 

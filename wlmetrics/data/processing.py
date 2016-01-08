@@ -24,10 +24,10 @@ import scipy.integrate as scint
 import matplotlib.pyplot as plt
 
 from pyberryimu.calibration.standard import StandardCalibration
-from pyberryimu.container import BerryIMUDataContainer
+from wlmetrics.container import WLMetricsContainer
 
 
-data = BerryIMUDataContainer.load('rec_gyro.json')
+data = WLMetricsContainer.load('rec_gyro.json')
 sc1 = StandardCalibration.load('/home/hbldh/Dropbox/Encrypted/PyBerryIMU/.pyberryimu-BACKUP_g1')
 sc1.gyro_bias_vector *= 57.2957795
 sc1.gyro_scale_factor_vector *= 57.2957795
@@ -50,6 +50,6 @@ g_sh = np.array(g_sh)
 
 plt.plot(g_sc1[:, d], 'b')
 plt.plot(scint.cumtrapz(g_sh[:, d], dx=1/100.), 'm')
-#plt.plot(g_sc2[:, d], 'g')
-#plt.plot(g_sh[:, d], 'r')
+plt.plot(g_sc2[:, d], 'g')
+plt.plot(g_sh[:, d], 'r')
 plt.show()
