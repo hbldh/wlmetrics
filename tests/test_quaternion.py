@@ -35,11 +35,9 @@ class TestSuiteQuaternion(object):
 
     @staticmethod
     def _reference_multiply(q1, q2):
-        return Quaternion([
-            q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z,
-            q1.w * q2.x + q1.x * q2.w + q1.y * q2.z - q1.z * q2.y,
-            q1.w * q2.y - q1.x * q2.z + q1.y * q2.w + q1.z * q2.x,
-            q1.w * q2.z + q1.x * q2.y - q1.y * q2.x + q1.z * q2.w])
+        return Quaternion(
+            [q1.w * q2.w - q1.imag.dot(q2.imag), ] +
+            (q1.w * q2.imag + q2.w * q1.imag + np.cross(q1.imag, q2.imag)).tolist())
 
     def test_add_1(self):
         def test_fcn(x, y):
@@ -80,8 +78,8 @@ class TestSuiteQuaternion(object):
         quat_1 = Quaternion(np.random.rand(4))
         quat_2 = Quaternion(np.random.rand(4))
 
-        np.testing.assert_allclose((self._reference_multiply(quat_1, quat_2) - (quat_1 * quat_2)).to_array(), 0.0)
-        np.testing.assert_allclose(self._reference_multiply(quat_1, quat_2).to_array() - (quat_1 * quat_2).to_array(), 0.0)
+        np.testing.assert_allclose((self._reference_multiply(quat_1, quat_2) - (quat_1 * quat_2)).to_array(), 0.0, atol=1e-16)
+        np.testing.assert_allclose(self._reference_multiply(quat_1, quat_2).to_array() - (quat_1 * quat_2).to_array(), 0.0, atol=1e-16)
 
     def test_norm_1(self):
         def test_fcn(q):
