@@ -1,3 +1,4 @@
+language: python
 sudo: false
 python:
   - 2.6
@@ -19,6 +20,7 @@ addons:
     - gfortran
     - build-essential
 install:
+  - "travis_wait pip install numpy>=1.10.0"
   - "travis_wait pip install -r requirements.txt"
 script: nosetests tests
 
