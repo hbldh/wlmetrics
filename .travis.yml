@@ -14,13 +14,20 @@ addons:
   apt:
     packages:
     - python-dev
-    - libblas-dev
+    - libatlas3gf-base
     - liblapack-dev
+    - libblas-dev
     - libatlas-dev
     - gfortran
     - build-essential
 install:
   - "travis_wait pip install numpy>=1.10.0"
   - "travis_wait pip install -r requirements.txt"
-script: nosetests tests
+  - "pip install pytest"
+  - "pip install pytest-cov"
+  - "pip install python-coveralls"
+  - "pip install -e ."
+script: py.test tests/ --cov wlmetrics --cov-report term-missing
+after_success:
+  - coveralls
 

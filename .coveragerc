@@ -1,0 +1,6 @@
+[run]
+branch = True
+source = wlmetrics
+include = */wlmetrics/*
+omit =
+    */setup.py
